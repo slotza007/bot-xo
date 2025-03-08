@@ -16,23 +16,18 @@
 - Flask
 
 ### การติดตั้ง
-1. Clone repository นี้
-```bash
-git clone https://github.com/yourusername/diggy-chess-simulator.git
-cd diggy-chess-simulator
-```
 
-2. ติดตั้ง dependencies
+1. ติดตั้ง dependencies
 ```bash
 pip install flask
 ```
 
-3. รันแอปพลิเคชัน
+2. รันแอปพลิเคชัน
 ```bash
 python app.py
 ```
 
-4. เปิดเว็บเบราว์เซอร์ และเข้าสู่ URL:
+3. เปิดเว็บเบราว์เซอร์ และเข้าสู่ URL:
 ```
 http://localhost:5000
 ```
