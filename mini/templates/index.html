@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot xo but veryeasy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 2px solid white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            background-color: #333;
+        }
+
+        .mark {
+            font-weight: bold;
+            font-size: 40px;
+            color: white;
+        }
+
+        .piece {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .piece-x {
+            color: white;
+        }
+
+        .piece-o {
+            color: white;
+            border-radius: 50%;
+            background-color: transparent;
+            border: 6px solid white;
+        }
+
+        .size-1 {
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+        }
+
+        .size-2 {
+            width: 50px;
+            height: 50px;
+            font-size: 35px;
+        }
+
+        .size-3 {
+            width: 70px;
+            height: 70px;
+            font-size: 50px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .reset-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+        }
+
+        .piece-selection {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .piece-btn {
+            width: 80px;
+            height: 80px;
+            border: 2px solid white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .piece-btn.selected {
+            background-color: #5f5;
+        }
+
+        .count-badge {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            background-color: green;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 20px;
+            min-height: 30px;
+        }
+
+        .x-piece {
+            position: relative;
+        }
+
+        .x-piece::before, .x-piece::after {
+            content: '';
+            position: absolute;
+            background-color: white;
+        }
+
+        .size-1 .x-piece::before, .size-1 .x-piece::after {
+            width: 20px;
+            height: 3px;
+        }
+
+        .size-2 .x-piece::before, .size-2 .x-piece::after {
+            width: 35px;
+            height: 5px;
+        }
+
+        .size-3 .x-piece::before, .size-3 .x-piece::after {
+            width: 50px;
+            height: 7px;
+        }
+
+        .x-piece::before {
+            transform: rotate(45deg);
+        }
+
+        .x-piece::after {
+            transform: rotate(-45deg);
+        }
+    </style>
+</head>
+<body>
+    <h1>Bot xo but veryeasy</h1>
+    
+    <div class="game-container">
+        <div class="controls">
+            <button class="reset-btn" id="resetButton">reset game</button>
+        </div>
+        
+        <div class="board" id="board">
+            <!-- Board cells will be created by JavaScript -->
+        </div>
+        
+        <div class="player-indicator">
+            <div class="piece-o size-3" id="player-indicator" style="margin-top: 30px;"></div>
+        </div>
+        
+        <div class="piece-selection">
+            <div class="piece-btn" id="size-1">
+                <div class="piece-x size-1">
+                    <div class="x-piece"></div>
+                </div>
+                <div class="count-badge" id="small-count">3</div>
+            </div>
+            <div class="piece-btn selected" id="size-2">
+                <div class="piece-x size-2">
+                    <div class="x-piece"></div>
+                </div>
+                <div class="count-badge" id="medium-count">3</div>
+            </div>
+            <div class="piece-btn" id="size-3">
+                <div class="piece-x size-3">
+                    <div class="x-piece"></div>
+                </div>
+                <div class="count-badge" id="large-count">2</div>
+            </div>
+        </div>
+        
+        <div class="message" id="message"></div>
+    </div>
+    
+    <script>
+        // Game state
+        const state = {
+            board: [
+                [' ', ' ', ' '],
+                [' ', ' ', ' '],
+                [' ', ' ', ' ']
+            ],
+            boardSizes: [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0]
+            ],
+            currentPlayer: 'X', // Player is always X, AI is O
+            selectedSize: 2, // Default selected size is medium (2)
+            gameOver: false,
+            playerPieces: {
+                // Based on the notebook, similar to the player1_info configuration
+                1: 3, // small pieces
+                2: 3, // medium pieces
+                3: 2  // large pieces
+            },
+            aiPieces: {
+                // Based on the notebook, similar to the player2_info configuration
+                1: 3, // small pieces
+                2: 3, // medium pieces
+                3: 2  // large pieces
+            }
+        };
+
+        // DOM Elements
+        const boardElement = document.getElementById('board');
+        const messageElement = document.getElementById('message');
+        const resetButton = document.getElementById('resetButton');
+        const playerIndicator = document.getElementById('player-indicator');
+        const smallCount = document.getElementById('small-count');
+        const mediumCount = document.getElementById('medium-count');
+        const largeCount = document.getElementById('large-count');
+        const sizeBtns = document.querySelectorAll('.piece-btn');
+
+        // Initialize the game
+        function initGame() {
+            // Clear board
+            boardElement.innerHTML = '';
+            
+            // Reset game state
+            state.board = [
+                [' ', ' ', ' '],
+                [' ', ' ', ' '],
+                [' ', ' ', ' ']
+            ];
+            state.boardSizes = [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0]
+            ];
+            state.currentPlayer = 'X';
+            state.gameOver = false;
+            state.playerPieces = {
+                1: 3,
+                2: 3,
+                3: 2
+            };
+            state.aiPieces = {
+                1: 3,
+                2: 3,
+                3: 2
+            };
+            
+            // Create board cells
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', () => handleCellClick(row, col));
+                    boardElement.appendChild(cell);
+                }
+            }
+            
+            // Update UI
+            updatePieceCounts();
+            updateMessage('Your turn. Select a piece and place it on the board.');
+            updatePlayerIndicator();
+        }
+
+        // Handle cell click
+        function handleCellClick(row, col) {
+            if (state.gameOver || state.currentPlayer !== 'X') return;
+            
+            // Check if the move is valid
+            if (!isValidMove(row, col, state.selectedSize, 'X')) {
+                updateMessage('Invalid move. Try again.');
+                return;
+            }
+            
+            // Make the move
+            makeMove(row, col, state.selectedSize, 'X');
+            
+            // Check for game end conditions
+            if (checkWinner('X')) {
+                state.gameOver = true;
+                updateMessage('You win!');
+                return;
+            }
+            
+            // Check if player has any valid moves left
+            if (isBoardFull()) {
+                state.gameOver = true;
+                const xCount = countPieces('X');
+                const oCount = countPieces('O');
+                if (xCount > oCount) {
+                    updateMessage('You win by piece count!');
+                } else if (oCount > xCount) {
+                    updateMessage('AI wins by piece count!');
+                } else {
+                    updateMessage('It\'s a draw!');
+                }
+                return;
+            }
+            
+            // AI's turn
+            state.currentPlayer = 'O';
+            updateMessage('AI is thinking...');
+            updatePlayerIndicator();
+            
+            // Slight delay for AI move
+            setTimeout(() => {
+                const aiMove = findBestMove();
+                if (aiMove) {
+                    const { row, col, size } = aiMove;
+                    makeMove(row, col, size, 'O');
+                    
+                    // Check for game end conditions after AI move
+                    if (checkWinner('O')) {
+                        state.gameOver = true;
+                        updateMessage('AI wins!');
+                        return;
+                    }
+                    
+                    // Check if AI has any valid moves left
+                    if (isBoardFull()) {
+                        state.gameOver = true;
+                        const xCount = countPieces('X');
+                        const oCount = countPieces('O');
+                        if (xCount > oCount) {
+                            updateMessage('You win by piece count!');
+                        } else if (oCount > xCount) {
+                            updateMessage('AI wins by piece count!');
+                        } else {
+                            updateMessage('It\'s a draw!');
+                        }
+                        return;
+                    }
+                } else {
+                    // If AI has no valid moves but game isn't over
+                    updateMessage('AI has no valid moves. Your turn.');
+                }
+                
+                // Back to player's turn
+                state.currentPlayer = 'X';
+                updateMessage('Your turn');
+                updatePlayerIndicator();
+            }, 800);
+        }
+
+        // Check if a move is valid
+        function isValidMove(row, col, size, player) {
+            // Check if the player has enough pieces of the selected size
+            if (player === 'X' && state.playerPieces[size] <= 0) {
+                return false;
+            }
+            if (player === 'O' && state.aiPieces[size] <= 0) {
+                return false;
+            }
+            
+            // Check if the cell already has a piece of the same or larger size
+            const currentSize = state.boardSizes[row][col];
+            const currentPlayer = state.board[row][col];
+            
+            // Cannot place on your own piece
+            if (currentPlayer === player) {
+                return false;
+            }
+            
+            // Can only place larger pieces on smaller ones
+            return currentSize < size;
+        }
+
+        // Make a move
+        function makeMove(row, col, size, player) {
+            // Update game state
+            state.board[row][col] = player;
+            state.boardSizes[row][col] = size;
+            
+            // Update piece counts
+            if (player === 'X') {
+                state.playerPieces[size]--;
+            } else {
+                state.aiPieces[size]--;
+            }
+            
+            // Update UI
+            updateBoard();
+            updatePieceCounts();
+        }
+
+        // Update the board UI
+        function updateBoard() {
+            const cells = document.querySelectorAll('.cell');
+            
+            cells.forEach((cell, index) => {
+                const row = Math.floor(index / 3);
+                const col = index % 3;
+                const player = state.board[row][col];
+                const size = state.boardSizes[row][col];
+                
+                // Clear previous content
+                cell.innerHTML = '';
+                
+                if (player !== ' ') {
+                    const piece = document.createElement('div');
+                    if (player === 'X') {
+                        piece.className = `piece piece-x size-${size}`;
+                        const xPiece = document.createElement('div');
+                        xPiece.className = 'x-piece';
+                        piece.appendChild(xPiece);
+                    } else {
+                        piece.className = `piece piece-o size-${size}`;
+                    }
+                    cell.appendChild(piece);
+                }
+            });
+        }
+
+        // Update piece count display
+        function updatePieceCounts() {
+            smallCount.textContent = state.playerPieces[1];
+            mediumCount.textContent = state.playerPieces[2];
+            largeCount.textContent = state.playerPieces[3];
+        }
+
+        // Update the message display
+        function updateMessage(message) {
+            messageElement.textContent = message;
+        }
+
+        // Update player indicator
+        function updatePlayerIndicator() {
+            if (state.currentPlayer === 'X') {
+                playerIndicator.style.borderColor = 'white';
+                playerIndicator.innerHTML = '<div class="x-piece"></div>';
+                playerIndicator.className = 'piece-x size-3';
+            } else {
+                playerIndicator.style.borderColor = 'white';
+                playerIndicator.innerHTML = '';
+                playerIndicator.className = 'piece-o size-3';
+            }
+        }
+
+        // Check for winner based on rows, columns, and diagonals
+        function checkWinner(player) {
+            // Check rows
+            for (let row = 0; row < 3; row++) {
+                if (state.board[row][0] === player && 
+                    state.board[row][1] === player && 
+                    state.board[row][2] === player) {
+                    return true;
+                }
+            }
+            
+            // Check columns
+            for (let col = 0; col < 3; col++) {
+                if (state.board[0][col] === player && 
+                    state.board[1][col] === player && 
+                    state.board[2][col] === player) {
+                    return true;
+                }
+            }
+            
+            // Check diagonals
+            if (state.board[0][0] === player && 
+                state.board[1][1] === player && 
+                state.board[2][2] === player) {
+                return true;
+            }
+            
+            if (state.board[0][2] === player && 
+                state.board[1][1] === player && 
+                state.board[2][0] === player) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Check if player has any valid moves left
+        function isBoardFull() {
+            const currentPlayerMark = state.currentPlayer;
+            const pieces = currentPlayerMark === 'X' ? state.playerPieces : state.aiPieces;
+            
+            // Check if current player has any valid moves
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    for (let size = 1; size <= 3; size++) {
+                        if (pieces[size] > 0 && isValidMove(row, col, size, currentPlayerMark)) {
+                            return false; // Player has at least one valid move
+                        }
+                    }
+                }
+            }
+            return true; // No valid moves for current player
+        }
+        
+        // Count pieces of a player on the board
+        function countPieces(player) {
+            let count = 0;
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    if (state.board[row][col] === player) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        // AI Logic based on Tigtagtoe.ipynb
+        function findBestMove() {
+            // Check if AI has any valid moves
+            let hasValidMove = false;
+            for (let size = 3; size >= 1; size--) {
+                if (state.aiPieces[size] <= 0) continue;
+                
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        if (isValidMove(row, col, size, 'O')) {
+                            hasValidMove = true;
+                            break;
+                        }
+                    }
+                    if (hasValidMove) break;
+                }
+                if (hasValidMove) break;
+            }
+            
+            if (!hasValidMove) {
+                return null; // No valid moves
+            }
+            
+            // Find all possible moves
+            const possibleMoves = [];
+            
+            // First, try to find a winning move
+            for (let size = 3; size >= 1; size--) {
+                if (state.aiPieces[size] <= 0) continue;
+                
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        if (isValidMove(row, col, size, 'O')) {
+                            // Try this move
+                            const originalState = state.board[row][col];
+                            const originalSize = state.boardSizes[row][col];
+                            
+                            state.board[row][col] = 'O';
+                            state.boardSizes[row][col] = size;
+                            
+                            // Check if this move leads to a win
+                            const isWinning = checkWinner('O');
+                            
+                            // Undo the move
+                            state.board[row][col] = originalState;
+                            state.boardSizes[row][col] = originalSize;
+                            
+                            if (isWinning) {
+                                return { row, col, size };
+                            }
+                            
+                            possibleMoves.push({ row, col, size });
+                        }
+                    }
+                }
+            }
+            
+            // If no immediate winning move, try to block player's winning move
+            for (let size = 3; size >= 1; size--) {
+                if (state.aiPieces[size] <= 0) continue;
+                
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        if (isValidMove(row, col, size, 'O')) {
+                            // Check all positions for potential player wins
+                            for (let pRow = 0; pRow < 3; pRow++) {
+                                for (let pCol = 0; pCol < 3; pCol++) {
+                                    for (let pSize = 3; pSize >= 1; pSize--) {
+                                        if (state.playerPieces[pSize] <= 0) continue;
+                                        if (!isValidMove(pRow, pCol, pSize, 'X')) continue;
+                                        
+                                        // Simulate player's move
+                                        const originalPState = state.board[pRow][pCol];
+                                        const originalPSize = state.boardSizes[pRow][pCol];
+                                        
+                                        state.board[pRow][pCol] = 'X';
+                                        state.boardSizes[pRow][pCol] = pSize;
+                                        
+                                        // Check if player wins
+                                        const playerWouldWin = checkWinner('X');
+                                        
+                                        // Restore state
+                                        state.board[pRow][pCol] = originalPState;
+                                        state.boardSizes[pRow][pCol] = originalPSize;
+                                        
+                                        if (playerWouldWin && row === pRow && col === pCol) {
+                                            return { row, col, size }; // Block this winning move
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // If no winning or blocking move, prefer center and corners
+            const strategicPositions = [
+                { row: 1, col: 1 }, // Center
+                { row: 0, col: 0 }, // Top-left corner
+                { row: 0, col: 2 }, // Top-right corner
+                { row: 2, col: 0 }, // Bottom-left corner
+                { row: 2, col: 2 }  // Bottom-right corner
+            ];
+            
+            for (const position of strategicPositions) {
+                for (let size = 3; size >= 1; size--) {
+                    if (state.aiPieces[size] <= 0) continue;
+                    
+                    if (isValidMove(position.row, position.col, size, 'O')) {
+                        return { row: position.row, col: position.col, size };
+                    }
+                }
+            }
+            
+            // If no strategic position is available, choose randomly from possible moves
+            if (possibleMoves.length > 0) {
+                return possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+            }
+            
+            // If no valid moves found (shouldn't happen if we do proper checking), return null
+            return null;
+        }
+
+        // Event listeners
+        resetButton.addEventListener('click', initGame);
+        
+        sizeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Get the size from the button ID
+                const size = parseInt(btn.id.split('-')[1]);
+                
+
+                // Check if player has pieces of this size
+                if (state.playerPieces[size] <= 0) {
+                    updateMessage('No more pieces of this size available');
+                    return;
+                }
+                
+                // Update selected size
+                state.selectedSize = size;
+                
+                // Update UI to show selected size
+                sizeBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+        });
+        
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
