@@ -1,7 +1,6 @@
 #project-bot-xo
 เกม Tic-Tac-Toe พิเศษที่ผู้เล่นสามารถวางหมากขนาดต่างๆได้ และสามารถวางหมากทับหมากของฝ่ายตรงข้ามได้หากหมากที่วางมีขนาดใหญ่กว่า
 
-![Diggy Chess Simulator Preview](https://via.placeholder.com/800x400?text=Diggy+Chess+Simulator)
 
 ## คุณสมบัติ
 - เกมการเล่นแบบ Tic-Tac-Toe ดั้งเดิมแต่มีการเพิ่มความซับซ้อน
